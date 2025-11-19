@@ -8,8 +8,8 @@ TOKEN = os.getenv('TOKEN')
 
 bot = telebot.TeleBot(TOKEN)
 
-MAIN_WEBSITE_URL = 'https://glavnyy-sayt-shkoly.com'
-WEBSITE_BUTTON_TEXT = '🌐 Наш Сайт'
+site = 'https://glavnyy-sayt-shkoly.com'
+site_btn = 'Наш Сайт'
 
 CLASSES = {
     'Класс 5': 'class_5',
@@ -167,12 +167,11 @@ SUBJECTS = {
     },
 }
 
-CLASS_NAMES_TO_KEYS = {name: key for name, key in CLASSES.items()}
+classes_name = {name: key for name, key in CLASSES.items()}
 
 
 def create_classes_reply_keyboard():
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True,
-                                       one_time_keyboard=False)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True,one_time_keyboard=False)
 
     buttons = [types.KeyboardButton(text=name) for name in CLASSES.keys()]
 
@@ -182,7 +181,7 @@ def create_classes_reply_keyboard():
         else:
             markup.add(buttons[i])
 
-    markup.add(types.KeyboardButton(text=WEBSITE_BUTTON_TEXT))
+    markup.add(types.KeyboardButton(text=site_btn))
 
     return markup
 
@@ -191,7 +190,7 @@ def create_subjects_keyboard(class_key):
     markup = types.InlineKeyboardMarkup()
     subjects_dict = SUBJECTS.get(class_key, {})
 
-    markup.add(types.InlineKeyboardButton(text="🌐 Наш Главный Сайт", url=MAIN_WEBSITE_URL))
+    markup.add(types.InlineKeyboardButton(text="Наш Главный Сайт", url=site))
 
     buttons = [types.InlineKeyboardButton(text=name, url=url) for name, url in subjects_dict.items()]
 
@@ -201,7 +200,7 @@ def create_subjects_keyboard(class_key):
         else:
             markup.add(buttons[i])
 
-    markup.add(types.InlineKeyboardButton(text="⬅️ Сменить класс", callback_data='show_classes'))
+    markup.add(types.InlineKeyboardButton(text="Сменить класс", callback_data='show_classes'))
     return markup
 
 
@@ -209,7 +208,7 @@ def create_subjects_keyboard(class_key):
 def send_welcome(message):
     classes_reply_markup = create_classes_reply_keyboard()
 
-    welcome_text = f"👋 **Приветствуем, {message.from_user.first_name}!**\n\n⬇️ **Выберите свой класс или перейдите на сайт** с помощью кнопок ниже:"
+    welcome_text = f" Приветствуем, {message.from_user.first_name}! \n\n Выберите свой класс или перейдите на сайт с помощью кнопок ниже:"
 
     bot.send_message(
         message.chat.id,
@@ -228,7 +227,7 @@ def ignore_callback(call):
 def callback_show_classes(call):
     bot.answer_callback_query(call.id)
     classes_reply_markup = create_classes_reply_keyboard()
-    menu_text = "Выберите **свой класс** с помощью **кнопок внизу** чата:"
+    menu_text = "Выберите свой класс:"
 
     try:
         bot.edit_message_text(menu_text, call.message.chat.id, call.message.message_id, parse_mode='Markdown')
@@ -238,13 +237,13 @@ def callback_show_classes(call):
         else:
              bot.send_message(call.message.chat.id, menu_text, parse_mode='Markdown')
 
-    bot.send_message(call.message.chat.id, "⬇️ Клавиатура обновлена ⬇️", reply_markup=classes_reply_markup)
+    bot.send_message(call.message.chat.id, "⬇️ Клавиатура обновлена ⬇", reply_markup=classes_reply_markup)
 
 
-@bot.message_handler(func=lambda message: message.text == WEBSITE_BUTTON_TEXT)
+@bot.message_handler(func=lambda message: message.text == site_btn)
 def handle_website_selection(message):
     markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton(text="➡️ Перейти на Главный Сайт", url=MAIN_WEBSITE_URL))
+    markup.add(types.InlineKeyboardButton(text="➡️ Перейти на Главный Сайт", url=site))
 
     bot.send_message(
         message.chat.id,
@@ -253,13 +252,13 @@ def handle_website_selection(message):
     )
 
 
-@bot.message_handler(func=lambda message: message.text in CLASS_NAMES_TO_KEYS)
+@bot.message_handler(func=lambda message: message.text in classes_name)
 def handle_class_selection(message):
     class_name = message.text
-    class_key = CLASS_NAMES_TO_KEYS[class_name]
+    class_key = classes_name[class_name]
     subjects_markup = create_subjects_keyboard(class_key)
 
-    menu_text = f"Выбран **{class_name}**. Теперь выберите предмет. Кнопка сразу ведет на учебный сайт."
+    menu_text = f"Выбран {class_name}. Теперь выберите предмет."
 
     bot.send_message(
         message.chat.id,
