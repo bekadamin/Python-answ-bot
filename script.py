@@ -187,7 +187,7 @@ def create_classes_reply_keyboard():
 
     return markup
 
-
+# основные кнопки
 def create_subjects_keyboard(class_key):
     markup = types.InlineKeyboardMarkup()
     subjects_dict = SUBJECTS.get(class_key, {})
@@ -212,12 +212,7 @@ def send_welcome(message):
 
     welcome_text = f" Приветствуем, {message.from_user.first_name}! \n\n Выберите свой класс или перейдите на сайт с помощью кнопок ниже:"
 
-    bot.send_message(
-        message.chat.id,
-        welcome_text,
-        reply_markup=classes_reply_markup,
-        parse_mode='Markdown'
-    )
+    bot.send_message(message.chat.id,welcome_text,reply_markup=classes_reply_markup,parse_mode='Markdown')
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'ignore')
@@ -230,6 +225,7 @@ def callback_show_classes(call):
     bot.answer_callback_query(call.id)
     classes_reply_markup = create_classes_reply_keyboard()
     menu_text = "Выберите свой класс:"
+
 
     try:
         bot.edit_message_text(menu_text, call.message.chat.id, call.message.message_id, parse_mode='Markdown')
@@ -247,11 +243,7 @@ def handle_website_selection(message):
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton(text="➡️ Перейти на Главный Сайт", url=site))
 
-    bot.send_message(
-        message.chat.id,
-        "Нажмите кнопку ниже, чтобы перейти на сайт:",
-        reply_markup=markup
-    )
+    bot.send_message(message.chat.id,"Нажмите кнопку ниже, чтобы перейти на сайт:",reply_markup=markup)
 
 
 @bot.message_handler(func=lambda message: message.text in classes_name)
@@ -262,12 +254,8 @@ def handle_class_selection(message):
 
     menu_text = f"Выбран {class_name}. Теперь выберите предмет."
 
-    bot.send_message(
-        message.chat.id,
-        menu_text,
-        reply_markup=subjects_markup,
-        parse_mode='Markdown'
-    )
+    bot.send_message(message.chat.id,menu_text,reply_markup=subjects_markup,parse_mode='Markdown')
+
 
 
 @bot.message_handler(content_types=['text'])
